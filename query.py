@@ -5,7 +5,7 @@ query = {"user": "user", "query": "answer yes if there's a sign of disaster, ans
 response = requests.post("http://localhost:8080/", json=query).json()  # Parse the JSON response
 print(response)
 if response == 'Yes':
-  quer = {"user": "user", "query": "tell us the name of the natural disaster which has a sign of happening"}
+  quer = {"user": "user", "query": "tell us the name of the natural disaster which has a sign of happening and what are the safety precautions when this natural disaster takes place"}
   respons = requests.post("http://localhost:8080/", json=quer).json()  # Parse the JSON response
   print(respons)
 else:
