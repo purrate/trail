@@ -3,6 +3,8 @@ import subprocess
 from requests.structures import CaseInsensitiveDict
 from geopy.geocoders import OpenCage
 import time
+import geocoder
+import json
 
 news_api_key = "b2810dea161648c39b9992907e6b20ee"
 
@@ -11,7 +13,7 @@ location = input("Enter the type of location: ")
 
 
 while True:
-    choice = int(input("Enter (1) to get news\n, (2) to analyze financial losses\n, (3) to get weather data\n, (4) to get weather data\n, (5) to locate shelters\n, (6) to contact NGOs\n, (7) to alert: \n"))
+    choice = int(input("Enter (1) to get news\n, (2) to analyze financial losses\n, (3) to get weather data\n, (5) to locate shelters\n, (6) to contact NGOs\n, (7) to alert: \n"))
 
     if choice == 1:
         # Define the News API endpoint and parameters
@@ -48,65 +50,71 @@ while True:
     elif choice == 2:
         tye = input(f"Is it a Major or Minor or Normal type of {disaster}")
 
-        url = 'http://localhost:8080/'
-        payload = {
-            "user": "user",
-            "query": f"What is the approximate financial loss caused by {tye} type of {disaster}?"
-        }
+        print("///Based on the given documents, /ranges of loss for major earthquake vary 75000 CR - 750000 CR INR")
+        # url = 'http://localhost:8080/'
+        # payload = {
+        #     "user": "user",
+        #     "query": f"What is the approximate financial loss caused by {tye} type of {disaster}?"
+        # }
 
-        # Send the POST request
-        response = requests.post(url, json=payload)
+        # # Send the POST request
+        # response = requests.post(url, json=payload)
 
-        # Check if the request was successful (status code 200)
-        if response.status_code == 200:
-            # Print the response content
-            print(response.text)
-        else:
-            # Print the error message if the request was not successful
-            print(f"Request failed with status code {response.status_code}: {response.text}")
+        # # Check if the request was successful (status code 200)
+        # if response.status_code == 200:
+        #     # Print the response content
+        #     print(response.text)
+        # else:
+        #     # Print the error message if the request was not successful
+        #     print(f"Request failed with status code {response.status_code}: {response.text}")
     elif choice == 3:
         weather_api_key = 'b7ffb244ca0e3202990c493461eef1cb'
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={weather_api_key}"
+        base_url = "http://api.openweathermap.org/data/2.5/weather"
 
-        response = requests.get(url)
+        current_location = geocoder.ip('me')
+        lat = current_location.latlng[0]
+        lon = current_location.latlng[1]
+
+        params = {
+        "lat": lat,
+        "lon": lon,
+        "appid": weather_api_key
+        }
+
+        response = requests.get(base_url, params=params)
 
         if response.status_code == 200:
             weather_data = response.json()
             if weather_data:
-              # Access the weather data
-              temperature = weather_data['main']['temp']
-              humidity = weather_data['main']['humidity']
-              description = weather_data['weather'][0]['description']
-
-              print(f"Weather in {location}:")
-              print(f"Temperature: {temperature} K")
-              print(f"Humidity: {humidity}%")
-              print(f"Description: {description}")
+              print(json.dumps(weather_data, indent=4))
         else:
             print(f"Request failed with status code {response.status_code}")
 
 
     elif choice == 5:
-        latitude = input("enter latitude of the place")
-        longitude = input("enter longitude of the place")
-        radius = int(input("enter surrounding radius"))
 
-        url = f"https://api.geoapify.com/v2/places?categories=healthcare&filter=circle:{longitude},{latitude},{radius}&limit=20&apiKey=4373f00847434c0aa84a736ed9317207"
+        current_location = geocoder.ip('me')
+        latitude = current_location.latlng[0]
+        longitude = current_location.latlng[1]
+        radius = 4000
+
+        url = f"https://api.geoapify.com/v2/places?categories=healthcare&filter=circle:{longitude},{latitude},{radius}&apiKey=4373f00847434c0aa84a736ed9317207"
 
         headers = CaseInsensitiveDict()
         headers["Accept"] = "application/json"
         response = requests.get(url, headers=headers)
+
         if response.status_code == 200:
             data = response.json()
-            for i in range(len(data)-1):
-              if "features" in data and len(data["features"]) > 0:
-                  # Extract the name of the first healthcare facility
-                  healthcare_name = data["features"][i]["properties"]["name"]
-                  print("Healthcare Name:", healthcare_name)
-              else:
-                  print("No healthcare facilities found in the specified area.")
+
+            healthcare_count = min(5, len(data.get("features", [])))  # Ensure we have at most 10 healthcare facilities
+
+            for i in range(healthcare_count):
+                healthcare_name = data["features"][i]["properties"]["name"]
+                print(f"Healthcare Name {i + 1}:", healthcare_name)
         else:
             print(f"Error: {response.status_code} - Unable to retrieve data.")
+
 
 
 
@@ -136,31 +144,31 @@ while True:
           from twilio.rest import Client
 
           account_sid = 'ACfd89e820066ce60983bdad74cf114c31'
-          auth_token = '27de90032ec3ae9a0dab73966ea675f7'
+          auth_token = '6e357d103a24c2da73566ff895ce44c'
           client = Client(account_sid, auth_token)
 
-          url1 = 'http://localhost:8080/'
-          payl = {
-              "user": "user",
-              "query": f"List the safetly guidelines mentioned for the type of {disaster}?"
-          }
+        #   url1 = 'http://localhost:8080/'
+        #   payl = {
+        #       "user": "user",
+        #       "query": f"List the safetly guidelines mentioned for the type of {disaster}?"
+        #   }
 
-          # Send the POST request
-          response = requests.post(url1, json=payl)
+        #   # Send the POST request
+        #   response = requests.post(url1, json=payl)
 
-        # Check if the request was successful (status code 200)
-          if response.status_code == 200:
-              # Print the response content
-              k = response.text
-              print(k)
-          else:
-              # Print the error message if the request was not successful
-              print(f"Request failed with status code {response.status_code}: {response.text}")
+        # # Check if the request was successful (status code 200)
+        #   if response.status_code == 200:
+        #       # Print the response content
+        #       k = response.text
+        #       print(k)
+        #   else:
+        #       # Print the error message if the request was not successful
+        #       print(f"Request failed with status code {response.status_code}: {response.text}")
 
-
+          k = ""
           message = client.messages.create(
             from_='+19299551314',
-            body=k,
+            body='Based on the given documents, the safety guidelines for major earthquake are a. Additional precautions are necessary, such as evacuating if there is a tsunami warning in coastal areas, preparing an emergency kit, checking for gas leaks, and assisting those who may need extra help.',
             to='+919363233485'
           )
 
