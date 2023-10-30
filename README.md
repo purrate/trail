@@ -1,5 +1,9 @@
 # TRAIL
 
+##DEMO VIDEO 
+
+https://www.loom.com/share/396e701aa1dd475db1751c9fe70a3ca1?sid=c70d0224-47de-47f2-9c14-71ca4c0a0214
+
 ## IDEA
 
 Every year, Our government is faced with some sort of challenge in handling emergency crisis situations. Our idea is to help with providing the Government with fast, concise and accurate solutions using a LLM such as GPT-3.5-turbo. We are implementing multiple features to make the crisis management process for the authorities in charge easier.
